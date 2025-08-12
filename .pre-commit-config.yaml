@@ -5,6 +5,9 @@ repos:
     - id: terraform_fmt
       args:
         - --args=-recursive
+    - id: terraform_tflint
+      args:
+        - --args=--module
     - id: terraform_docs
       args:
         - --args=--config=.terraform-docs.yaml

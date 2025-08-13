@@ -17,6 +17,19 @@ resource "google_iam_workload_identity_pool" "terraform" {
   workload_identity_pool_id = local.workload_identity_pool_id
 }
 
+resource "google_iam_workload_identity_pool_provider" "terraform" {
+  count = var.cloud_provider == "google" ? 1 : 0
+
+  workload_identity_pool_provider_id = local.workload_identity_pool_provider_id
+  display_name                       = format("GitHub Actions for %s", google_iam_workload_identity_pool.terraform[0].workload_identity_pool_id)
+
+  workload_identity_pool_id = google_iam_workload_identity_pool.terraform[0].id
+
+  oidc {
+    issuer_uri = "https://token.actions.githubusercontent.com"
+  }
+}
+
 resource "github_actions_secret" "google_service_account_email" {
   count           = var.cloud_provider == "google" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name

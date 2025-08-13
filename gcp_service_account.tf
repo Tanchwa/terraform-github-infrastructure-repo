@@ -12,9 +12,21 @@ resource "google_project_iam_member" "terraform" {
   member  = "serviceAccount:${google_service_account.terraform[0].email}"
 }
 
+resource "google_iam_workload_identity_pool" "terraform" {
+  count                     = var.cloud_provider == "google" ? 1 : 0
+  workload_identity_pool_id = local.workload_identity_pool_id
+}
+
 resource "github_actions_secret" "google_service_account_email" {
   count           = var.cloud_provider == "google" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
   secret_name     = "GOOGLE_SERVICE_ACCOUNT_EMAIL"
   plaintext_value = google_service_account.terraform[0].email
+}
+
+resource "github_actions_secret" "google_workload_identity_provider" {
+  count           = var.cloud_provider == "google" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "GOOGLE_WORKLOAD_IDENTITY_PROVIDER"
+  plaintext_value = gooele_iam_workload_identity_pool.terraform[0].id
 }

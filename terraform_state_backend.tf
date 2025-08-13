@@ -9,7 +9,7 @@ resource "aws_s3_bucket" "terraform_state_bucket" {
 resource "azurerm_storage_account" "terraform_state_account" {
   count               = var.cloud_provider == "azure" ? 1 : 0
   resource_group_name = "TERRAFORM-META-RG"
-  location            = "East US"
+  location            = var.location
 
   name = "${var.repository_name}terraformstate"
 

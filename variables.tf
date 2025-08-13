@@ -15,8 +15,13 @@ variable "repository_name" {
   default     = "my-repo"
 }
 
+variable "location" {
+  description = "Location of the cloud resources to be created; cloud agnostic"
+  type        = string
+}
+
 variable "tags" {
-  description = "A map of tags to apply to the resources."
+  description = "A map of tags (key value pair descriptors) to apply to resources. In GCP, these are known as labels"
   type        = map(string)
   default = {
     ManagedBy = "Terraform"

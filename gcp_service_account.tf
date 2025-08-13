@@ -12,6 +12,14 @@ resource "google_project_iam_member" "terraform" {
   member  = "serviceAccount:${google_service_account.terraform[0].email}"
 }
 
+resource "google_service_account_iam_member" "workload_id_to_sp" {
+  count              = var.cloud_provider == "google" ? 1 : 0
+  service_account_id = google_service_account.terraform[0].name
+
+  role   = "roles/iam.workloadIdentityUser"
+  member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.terraform[0].id}/attribute.repository/${var.repository_owner}/${var.repository_name}"
+}
+
 resource "google_iam_workload_identity_pool" "terraform" {
   count                     = var.cloud_provider == "google" ? 1 : 0
   workload_identity_pool_id = local.workload_identity_pool_id
@@ -33,19 +41,22 @@ resource "google_iam_workload_identity_pool_provider" "terraform" {
   # BECAUSE I DIDN'T WANT TO HAVE IT RESTRICTED TO SPECIFIC BRANCH
 
   attribute_condition = <<EOT
+    assertion.repository_owner == "${var.repository_owner}" &&
     attribute.repository == "${var.repository_owner}/${var.repository_name}"
 EOT
   attribute_mapping = {
-    "google.subject"       = "assertion.sub"
-    "attribute.actor"      = "assertion.actor"
-    "attribute.aud"        = "assertion.aud"
-    "attribute.repository" = "assertion.repository"
+    "google.subject"             = "assertion.sub"
+    "attribute.actor"            = "assertion.actor"
+    "attribute.aud"              = "assertion.aud"
+    "attribute.repository"       = "assertion.repository"
+    "attribute.repository_owner" = "assertion.repository_owner"
   }
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }
 }
+
 
 resource "github_actions_secret" "google_service_account_email" {
   count           = var.cloud_provider == "google" ? 1 : 0

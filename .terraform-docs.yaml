@@ -1,4 +1,4 @@
-formatter: mardown document
+formatter: markdown document
 header-from: .terraform-docs-header.md
 footer-from: .terraform-docs-footer.md
 

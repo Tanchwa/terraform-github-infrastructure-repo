@@ -25,6 +25,23 @@ resource "google_iam_workload_identity_pool_provider" "terraform" {
 
   workload_identity_pool_id = google_iam_workload_identity_pool.terraform[0].id
 
+  #THIS IS FROM THE TERRAFORM DOCS, BUT SOME OF THE MAPPINGS LOOK OFF TO ME, TOOK OUT 
+  #assertion.repository_owner_id == "123456789" &&
+  # assertion.ref == "refs/heads/main" &&
+  # assertion.ref_type == "branch"
+  #
+  # BECAUSE I DIDN'T WANT TO HAVE IT RESTRICTED TO SPECIFIC BRANCH
+
+  attribute_condition = <<EOT
+    attribute.repository == "${var.repository_owner}/${var.repository_name}"
+EOT
+  attribute_mapping = {
+    "google.subject"       = "assertion.sub"
+    "attribute.actor"      = "assertion.actor"
+    "attribute.aud"        = "assertion.aud"
+    "attribute.repository" = "assertion.repository"
+  }
+
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
   }

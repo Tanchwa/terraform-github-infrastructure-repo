@@ -15,6 +15,12 @@ variable "repository_name" {
   default     = "my-repo"
 }
 
+variable "repository_owner" {
+  description = "The owner of the repository."
+  type        = string
+  default     = "my-org"
+}
+
 variable "location" {
   description = "Location of the cloud resources to be created; cloud agnostic"
   type        = string

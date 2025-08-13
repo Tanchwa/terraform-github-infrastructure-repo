@@ -4,7 +4,7 @@ resource "github_repository" "infrastructure-deployment" {
   visibility  = "private"
 
   template {
-    owner                = "Tanchwa"
+    owner                = var.repository_owner
     repository           = "infrastructure-deployment-template"
     include_all_branches = true
   }

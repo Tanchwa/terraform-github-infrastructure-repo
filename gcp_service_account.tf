@@ -16,7 +16,8 @@ resource "google_service_account_iam_member" "workload_id_to_sp" {
   count              = var.cloud_provider == "google" ? 1 : 0
   service_account_id = google_service_account.terraform[0].name
 
-  role   = "roles/iam.workloadIdentityUser"
+  role = "roles/iam.workloadIdentityUser"
+  #may need to double check this, Kevin used subject, but I don't know if you can just use any attribute
   member = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.terraform[0].id}/attribute.repository/${var.repository_owner}/${var.repository_name}"
 }
 
@@ -32,24 +33,15 @@ resource "google_iam_workload_identity_pool_provider" "terraform" {
   display_name                       = format("GitHub Actions for %s", google_iam_workload_identity_pool.terraform[0].workload_identity_pool_id)
 
   workload_identity_pool_id = google_iam_workload_identity_pool.terraform[0].id
-
-  #THIS IS FROM THE TERRAFORM DOCS, BUT SOME OF THE MAPPINGS LOOK OFF TO ME, TOOK OUT 
-  #assertion.repository_owner_id == "123456789" &&
-  # assertion.ref == "refs/heads/main" &&
-  # assertion.ref_type == "branch"
-  #
-  # BECAUSE I DIDN'T WANT TO HAVE IT RESTRICTED TO SPECIFIC BRANCH
-
-  attribute_condition = <<EOT
+  attribute_condition       = <<EOT
     assertion.repository_owner == "${var.repository_owner}" &&
-    attribute.repository == "${var.repository_owner}/${var.repository_name}"
+    assertion.repository == "${var.repository_owner}/${var.repository_name}" &&
 EOT
   attribute_mapping = {
     "google.subject"             = "assertion.sub"
     "attribute.actor"            = "assertion.actor"
-    "attribute.aud"              = "assertion.aud"
-    "attribute.repository"       = "assertion.repository"
     "attribute.repository_owner" = "assertion.repository_owner"
+    "attribute.repository"       = "assertion.repository"
   }
 
   oidc {
@@ -69,5 +61,5 @@ resource "github_actions_secret" "google_workload_identity_provider" {
   count           = var.cloud_provider == "google" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
   secret_name     = "GOOGLE_WORKLOAD_IDENTITY_PROVIDER"
-  plaintext_value = gooele_iam_workload_identity_pool.terraform[0].id
+  plaintext_value = google_iam_workload_identity_pool_provider.terraform[0].id
 }

@@ -5,13 +5,6 @@ resource "google_service_account" "terraform" {
   project = google_project.terraform[0].project_id
 }
 
-resource "google_project_iam_member" "terraform" {
-  count   = var.cloud_provider == "google" ? 1 : 0
-  project = google_project.terraform[0].project_id
-  role    = "roles/editor"
-  member  = "serviceAccount:${google_service_account.terraform[0].email}"
-}
-
 resource "google_service_account_iam_member" "workload_id_to_sp" {
   count              = var.cloud_provider == "google" ? 1 : 0
   service_account_id = google_service_account.terraform[0].name

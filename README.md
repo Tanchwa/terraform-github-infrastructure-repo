@@ -1,5 +1,5 @@
 <!-- BEGIN_TF_DOCS -->
-# MODULE NAME
+# Cloud Landingzone Github Repository
 
 - [Purpose](#purpose)
 - [Details](#details)
@@ -10,7 +10,11 @@
 - [Contributing](#contributing)
 
 ## Purpose
+Deploys an infrastructure github repository and the cloud infrastructure to support it. This is a 1 to 1 relationship, meaning that each repository will have its own set of cloud resources.
 ## Details
+The repository will be set up to use GitHub actions for deploying terraform infrastructure, and will include a basic workflow file. The upstream source of these can be found in the "infrastructure-deployment-template" repository. In addition, this module will automatically create the necessary secrets and resources for OIDC connect for passwordless authentication to the cloud provider.
+The module will create an authentication context specific to the cloud provider specified (usually a service principal/account) and will grant full read, write, and delete permissions to the resources within a specific context, such as VPC in AWS, Project in GCP, or Subscription in Azure.
+Finally, the module will also create a blob storage for the backend terraform state files. This will live in a "meta" context in the cloud provider, meaning that it will not be tied to a specific repository, but rather to the organization or account as a whole. The service context created will be able to create and read the files, but will not be able to delete the storage account or container.
 ## Usage
 ## Gotchas
 
@@ -59,6 +63,14 @@ Description: The owner of the repository.
 Type: `string`
 
 Default: `"my-org"`
+
+### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
+
+Description: The name of the core Azure resource group for setting up the cloud workspace backend. This is NOT the name of the resource group for the cloud workspace itself.
+
+Type: `string`
+
+Default: `"core-resource-group"`
 
 ### <a name="input_tags"></a> [tags](#input\_tags)
 

@@ -8,7 +8,7 @@ resource "aws_s3_bucket" "terraform_state_bucket" {
 
 resource "azurerm_storage_account" "terraform_state_account" {
   count               = var.cloud_provider == "azure" ? 1 : 0
-  resource_group_name = "TERRAFORM-META-RG"
+  resource_group_name = var.resource_group_name
   location            = var.location
 
   name = "${var.repository_name}terraformstate"
@@ -38,6 +38,7 @@ resource "azurerm_role_assignment" "terraform_state_role_assignment" {
   principal_id         = azuread_service_principal.terraform[0].object_id
 
   depends_on = [azurerm_storage_container.terraform_state_container]
+  #This may need to be done in the secondary subscription's context, keeping it here for now
 }
 
 resource "google_storage_bucket" "terraform_state_bucket" {

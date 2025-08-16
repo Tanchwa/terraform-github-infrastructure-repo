@@ -9,6 +9,12 @@ variable "cloud_provider" {
   }
 }
 
+variable "resource_group_name" {
+  description = "The name of the core Azure resource group for setting up the cloud workspace backend. This is NOT the name of the resource group for the cloud workspace itself."
+  type        = string
+  default     = "core-resource-group"
+}
+
 #variable "aws_vpc_cidr_block" {
 #  description = "The CIDR block for the AWS VPC."
 #  type        = string

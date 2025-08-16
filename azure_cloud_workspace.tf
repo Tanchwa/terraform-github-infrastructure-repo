@@ -9,6 +9,13 @@ resource "azurerm_subscription" "terraform" {
   billing_scope_id  = data.azurerm_billing_account.terraform[0].id
 }
 
+resource "azurerm_role_assignment" "terraform" {
+  count                = var.cloud_provider == "azure" ? 1 : 0
+  scope                = azurerm_subscription.terraform[0].id
+  role_definition_name = "Contributor"
+  principal_id         = azuread_service_principal.terraform[0].id
+}
+
 resource "github_actions_secret" "azure_subscription_id" {
   count           = var.cloud_provider == "azure" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
@@ -17,7 +24,7 @@ resource "github_actions_secret" "azure_subscription_id" {
 }
 
 provider "azurerm" {
-  alias           = "child_subscription"
+  alias           = "new_subscription"
   subscription_id = azurerm_subscription.terraform[0].id
   client_id       = azuread_service_principal.terraform[0].client_id
   tenant_id       = azuread_service_principal.terraform[0].tenant_id
@@ -31,10 +38,17 @@ resource "azurerm_resource_group" "terraform" {
 
   tags = var.tags
 
-  provider = azurerm.child_subscription
+  provider = azurerm.new_subscription
   depends_on = [
     azurerm_subscription.terraform,
     azuread_service_principal.terraform,
     azuread_service_principal_password.terraform
   ]
+}
+
+resource "github_actions_secret" "azure_resource_group_id" {
+  count           = var.cloud_provider == "azure" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "RESOURCE_GROUP_ID"
+  plaintext_value = azurerm_resource_group.terraform[0].id
 }

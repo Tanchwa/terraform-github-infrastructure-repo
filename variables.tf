@@ -9,6 +9,12 @@ variable "cloud_provider" {
   }
 }
 
+#variable "aws_vpc_cidr_block" {
+#  description = "The CIDR block for the AWS VPC."
+#  type        = string
+#  default     = ""
+#}
+
 variable "repository_name" {
   description = "The name of the repository to create."
   type        = string
@@ -26,6 +32,12 @@ variable "location" {
   type        = string
 }
 
+variable "billing_account" {
+  description = "Billing account Display Name for the cloud provider (if applicable)."
+  type        = string
+  default     = ""
+}
+
 variable "tags" {
   description = "A map of tags (key value pair descriptors) to apply to resources. In GCP, these are known as labels"
   type        = map(string)
@@ -33,3 +45,4 @@ variable "tags" {
     ManagedBy = "Terraform"
   }
 }
+

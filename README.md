@@ -28,6 +28,14 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_billing_account"></a> [billing\_account](#input\_billing\_account)
+
+Description: Billing account Display Name for the cloud provider (if applicable).
+
+Type: `string`
+
+Default: `""`
+
 ### <a name="input_cloud_provider"></a> [cloud\_provider](#input\_cloud\_provider)
 
 Description: The cloud provider to use for the infrastructure.

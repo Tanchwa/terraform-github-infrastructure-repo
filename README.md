@@ -81,7 +81,7 @@ Default: `"aws"`
 
 ### <a name="input_parent_organization_id"></a> [parent\_organization\_id](#input\_parent\_organization\_id)
 
-Description: The AWS parent Organization or OU, or GCP Organization ID to link the new account to
+Description: The AWS parent Organization or OU, or GCP Organization ID to link the new account or Project to
 
 Type: `string`
 

@@ -49,7 +49,7 @@ variable "aws_account_email" {
 }
 
 variable "parent_organization_id" {
-  description = "The AWS parent Organization or OU, or GCP Organization ID to link the new account to"
+  description = "The AWS parent Organization or OU, or GCP Organization ID to link the new account or Project to"
   type        = string
   default     = ""
 }

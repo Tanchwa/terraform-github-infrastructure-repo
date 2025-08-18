@@ -15,31 +15,41 @@ variable "resource_group_name" {
   default     = "core-resource-group"
 }
 
-#variable "aws_vpc_cidr_block" {
-#  description = "The CIDR block for the AWS VPC."
-#  type        = string
-#  default     = ""
-#}
+variable "aws_vpc_cidr_block" {
+  description = "The CIDR block for the AWS VPC."
+  type        = string
+  default     = ""
+}
 
 variable "repository_name" {
   description = "The name of the repository to create."
   type        = string
-  default     = "my-repo"
 }
 
 variable "repository_owner" {
   description = "The owner of the repository."
   type        = string
-  default     = "my-org"
 }
 
 variable "location" {
-  description = "Location of the cloud resources to be created; cloud agnostic"
+  description = "Location of the cloud resources to be created; cloud agnostic: maps to AWS region, Azure location, or GCP location."
   type        = string
 }
 
 variable "billing_account" {
-  description = "Billing account Display Name for the cloud provider (if applicable)."
+  description = "Billing account Display Name for the cloud provider. Not applicable to AWS, instead use the AWS parent organization ID. (see https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html)"
+  type        = string
+  default     = ""
+}
+
+variable "aws_account_email" {
+  description = "The email address for the new AWS parent account to be linked to"
+  type        = string
+  default     = ""
+}
+
+variable "parent_organization_id" {
+  description = "The AWS parent Organization or OU, or GCP Organization ID to link the new account to"
   type        = string
   default     = ""
 }

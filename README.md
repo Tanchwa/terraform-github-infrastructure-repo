@@ -13,10 +13,13 @@
 Deploys an infrastructure github repository and the cloud infrastructure to support it. This is a 1 to 1 relationship, meaning that each repository will have its own set of cloud resources.
 ## Details
 The repository will be set up to use GitHub actions for deploying terraform infrastructure, and will include a basic workflow file. The upstream source of these can be found in the "infrastructure-deployment-template" repository. In addition, this module will automatically create the necessary secrets and resources for OIDC connect for passwordless authentication to the cloud provider.
-The module will create an authentication context specific to the cloud provider specified (usually a service principal/account) and will grant full read, write, and delete permissions to the resources within a specific context, such as VPC in AWS, Project in GCP, or Subscription in Azure.
+The module will create an authentication context specific to the cloud provider specified (usually a service principal/account) and will grant full read, write, and delete permissions to the resources within a specific context, such as an Account in AWS, Project in GCP, or Subscription in Azure. These resources were chosen due to their ability to be used to easily assign billing accounts, and to get out of the way of the user. A default resource "container" (Resource Group in Azure, Project/ VPC in GCP, or VPC in AWS) will also be created.
 Finally, the module will also create a blob storage for the backend terraform state files. This will live in a "meta" context in the cloud provider, meaning that it will not be tied to a specific repository, but rather to the organization or account as a whole. The service context created will be able to create and read the files, but will not be able to delete the storage account or container.
 ## Usage
+These module should be consumed from a central repository used to manage the landingzone infrastructure. It is not intended to be used as a standalone module, but rather as part of a larger infrastructure deployment process. The central repository should include things like management groups, policies, and other resources that are necessary for the overall infrastructure management.
 ## Gotchas
+### Auto-created Variable Naming
+Variables related to the authentication of the cloud provider will be pre-pended with their ususal prefix for that context. For example, ARM\_, AWS\_, GOOGLE\_. Any OTHER variables specific to the provider will NOT be pre-pended. Some examples of these variables are: PROJECT\_ID (GCP) and RESOURCE\_GROUP\_NAME (Azure).
 
 ## Required Inputs
 
@@ -24,7 +27,19 @@ The following input variables are required:
 
 ### <a name="input_location"></a> [location](#input\_location)
 
-Description: Location of the cloud resources to be created; cloud agnostic
+Description: Location of the cloud resources to be created; cloud agnostic: maps to AWS region, Azure location, or GCP location.
+
+Type: `string`
+
+### <a name="input_repository_name"></a> [repository\_name](#input\_repository\_name)
+
+Description: The name of the repository to create.
+
+Type: `string`
+
+### <a name="input_repository_owner"></a> [repository\_owner](#input\_repository\_owner)
+
+Description: The owner of the repository.
 
 Type: `string`
 
@@ -32,9 +47,25 @@ Type: `string`
 
 The following input variables are optional (have default values):
 
+### <a name="input_aws_account_email"></a> [aws\_account\_email](#input\_aws\_account\_email)
+
+Description: The email address for the new AWS parent account to be linked to
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_aws_vpc_cidr_block"></a> [aws\_vpc\_cidr\_block](#input\_aws\_vpc\_cidr\_block)
+
+Description: The CIDR block for the AWS VPC.
+
+Type: `string`
+
+Default: `""`
+
 ### <a name="input_billing_account"></a> [billing\_account](#input\_billing\_account)
 
-Description: Billing account Display Name for the cloud provider (if applicable).
+Description: Billing account Display Name for the cloud provider. Not applicable to AWS, instead use the AWS parent organization ID. (see https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html)
 
 Type: `string`
 
@@ -48,21 +79,13 @@ Type: `string`
 
 Default: `"aws"`
 
-### <a name="input_repository_name"></a> [repository\_name](#input\_repository\_name)
+### <a name="input_parent_organization_id"></a> [parent\_organization\_id](#input\_parent\_organization\_id)
 
-Description: The name of the repository to create.
-
-Type: `string`
-
-Default: `"my-repo"`
-
-### <a name="input_repository_owner"></a> [repository\_owner](#input\_repository\_owner)
-
-Description: The owner of the repository.
+Description: The AWS parent Organization or OU, or GCP Organization ID to link the new account to
 
 Type: `string`
 
-Default: `"my-org"`
+Default: `""`
 
 ### <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name)
 

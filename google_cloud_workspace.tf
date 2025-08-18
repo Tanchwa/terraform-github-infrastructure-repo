@@ -8,7 +8,7 @@ resource "google_project" "terraform" {
   name            = local.google_project_name
   project_id      = local.google_project_id
   billing_account = data.google_billing_account.terraform[0].name
-  #TODO add default org_id or folder_id
+  org_id          = try(var.parent_organization_id, null)
 
   labels = var.tags
 }

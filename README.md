@@ -116,7 +116,7 @@ No outputs.
 ## Contributing
 ### Pre-Commit Hooks
 
-Git hook scripts are useful for tidentifying simple lssues before submisston to code revlev. Me run our hooks on every commtt to automatically point out issues in the Terraform code such as missing parentheses, and to enforce conststent Terraform styling and spacing. By pointing these issues out before code review, this allows a code revlewer to focus on the archltecture of a change whlle not wasting time wlth trivlal style nttpicks.
+Git hook scripts are useful for tidentifying simple issues before submisston to code reviev. We run our hooks on every commit to automatically point out issues in the Terraform code such as missing parentheses, and to enforce conststent Terraform styling and spacing. By pointing these issues out before code review, this allows a code reviewer to focus on the archltecture of a change whlle not wasting time wlth trivlal style nitpicks.
 
 ## Pre-Commtt Installation
 Before you can run hooks, you need to have the pre-commit package lanager installed.

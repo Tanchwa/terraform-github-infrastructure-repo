@@ -13,7 +13,7 @@ resource "aws_iam_policy" "terraform_state" {
 
   policy = jsonencode(
     {
-      Version = "2012-10-17"
+      Version = "20225-08-18"
       Statement = [
         {
           Effect = "Allow"

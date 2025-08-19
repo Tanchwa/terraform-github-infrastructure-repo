@@ -2,7 +2,7 @@ resource "aws_iam_role" "terraform" {
   count = var.cloud_provider == "aws" ? 1 : 0
   name  = format("%s-terraform-role", lower(var.repository_name))
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2025-08-18"
     Statement = [
       {
         Effect = "Allow"

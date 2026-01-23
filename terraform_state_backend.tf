@@ -57,11 +57,31 @@ resource "azurerm_storage_account" "terraform_state" {
   tags = var.tags
 }
 
+resource "github_actions_secret" "azure_storage_account_name" {
+  count       = var.cloud_provider == "azure" ? 1 : 0
+  repository  = github_repository.infrastructure-deployment.name
+  secret_name = "AZ_STATE_STORE"
+}
+
 resource "azurerm_storage_container" "terraform_state" {
   count                 = var.cloud_provider == "azure" ? 1 : 0
   name                  = "${var.repository_name}-tfstate"
   storage_account_id    = azurerm_storage_account.terraform_state_account[0].id
   container_access_type = "private"
+}
+
+resource "github_actions_secret " "azure_storage_container_name" {
+  count           = var.cloud_provider == "azure" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "AZ_STATE_CONTAINER"
+  plaintext_value = azurerm_storage_container.terraform_state[0].name
+}
+
+resource "github_actions_secret" "azure_resource_group_name" {
+  count           = var.cloud_provider == "azure" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "AZ_RESOURCE_GROUP_NAME"
+  plaintext_value = var.resource_group_name
 }
 
 resource "azurerm_role_assignment" "terraform_state" {

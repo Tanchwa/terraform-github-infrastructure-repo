@@ -1,5 +1,5 @@
 locals {
-  azure_resource_group_name          = format("%s-RG", upper(var.repository_name))
+  azure_subscription_alias           = format("sub-%s-terraform", lower(var.repository_name))
   azure_service_principal_name       = format("sp-%s-terraform", var.repository_name)
   google_project_name                = format("%s Project", upper(var.repository_name))
   google_project_id                  = format("%s-project", lower(var.repository_name))

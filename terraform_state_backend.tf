@@ -6,6 +6,44 @@ resource "aws_s3_bucket" "terraform_state" {
   tags = var.tags
 }
 
+resource "aws_s3_bucket_public_access_block" "terraform_state" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+
+  bucket = aws_s3_bucket.terraform_state[0].id
+
+  block_public_acls       = true
+  block_public_policy     = true
+  restrict_public_buckets = true
+  ignore_public_acls      = true
+}
+
+resource "aws_s3_bucket_logging" "terraform_state" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+
+  # or change me to a different bucket if you want to keep logs separate from state files
+  bucket        = aws_s3_bucket.terraform_state[0].id
+  target_bucket = aws_s3_bucket.terraform_state[0].id
+  target_prefix = "logs/"
+}
+
+resource "aws_sns_topic" "terraform_state" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+
+  name = "${var.repository_name}-terraform-state-notifications"
+}
+
+resource "aws_s3_bucket_notification" "terraform_state" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+
+  bucket = aws_s3_bucket.terraform_state[0].id
+
+  topic {
+    topic_arn     = aws_sns_topic.terraform_state[0].arn
+    events        = ["s3:ObjectCreated:*"]
+    filter_prefix = "logs/"
+  }
+}
+
 resource "aws_iam_policy" "terraform_state" {
   count = var.cloud_provider == "aws" ? 1 : 0
 
@@ -39,16 +77,23 @@ resource "aws_iam_role_policy_attachment" "terraform_state" {
   policy_arn = aws_iam_policy.terraform_state[0].arn
 }
 
+locals {
+  sate_storage_account_cleaned = lower(replace(var.repository_name, "/[^a-z0-9]/", ""))
+}
+
 resource "azurerm_storage_account" "terraform_state" {
   count               = var.cloud_provider == "azure" ? 1 : 0
   resource_group_name = var.resource_group_name
   location            = var.location
 
-  name = "${var.repository_name}terraformstate"
+  name = "${local.sate_storage_account_cleaned}tfstate"
 
   account_tier             = "Standard"
-  account_kind             = "Blob"
+  account_kind             = "BlobStorage"
   account_replication_type = "LRS"
+
+  shared_access_key_enabled       = false
+  allow_nested_items_to_be_public = false
 
   blob_properties {
     versioning_enabled = true
@@ -58,19 +103,20 @@ resource "azurerm_storage_account" "terraform_state" {
 }
 
 resource "github_actions_secret" "azure_storage_account_name" {
-  count       = var.cloud_provider == "azure" ? 1 : 0
-  repository  = github_repository.infrastructure-deployment.name
-  secret_name = "AZ_STATE_STORE"
+  count           = var.cloud_provider == "azure" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "AZ_STATE_STORE"
+  plaintext_value = azurerm_storage_account.terraform_state[0].name
 }
 
 resource "azurerm_storage_container" "terraform_state" {
   count                 = var.cloud_provider == "azure" ? 1 : 0
   name                  = "${var.repository_name}-tfstate"
-  storage_account_id    = azurerm_storage_account.terraform_state_account[0].id
+  storage_account_id    = azurerm_storage_account.terraform_state[0].id
   container_access_type = "private"
 }
 
-resource "github_actions_secret " "azure_storage_container_name" {
+resource "github_actions_secret" "azure_storage_container_name" {
   count           = var.cloud_provider == "azure" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
   secret_name     = "AZ_STATE_CONTAINER"
@@ -86,9 +132,9 @@ resource "github_actions_secret" "azure_resource_group_name" {
 
 resource "azurerm_role_assignment" "terraform_state" {
   count                = var.cloud_provider == "azure" ? 1 : 0
-  scope                = azurerm_storage_account.terraform_state_account[0].id
+  scope                = azurerm_storage_account.terraform_state[0].id
   role_definition_name = "Storage Blob Data Contributor"
-  principal_id         = azuread_service_principal.terraform[0].object_id
+  principal_id         = azurerm_user_assigned_identity.terraform[0].principal_id
 
   depends_on = [azurerm_storage_container.terraform_state]
   #This may need to be done in the secondary subscription's context, keeping it here for now
@@ -112,9 +158,9 @@ resource "google_storage_bucket" "terraform_state" {
 
 resource "google_storage_bucket_iam_member" "terraform_state" {
   count  = var.cloud_provider == "google" ? 1 : 0
-  bucket = google_storage_bucket.terraform_state_bucket[0].name
+  bucket = google_storage_bucket.terraform_state[0].name
   role   = "roles/storage.objectAdmin"
-  member = "serviceAccount:${google_service_account.terraform_service_account[0].email}"
+  member = "serviceAccount:${google_service_account.terraform[0].email}"
 
   depends_on = [google_storage_bucket.terraform_state]
 }

@@ -1,6 +1,6 @@
 locals {
   azure_subscription_alias           = format("sub-%s-terraform", lower(var.repository_name))
-  azure_service_principal_name       = format("sp-%s-terraform", var.repository_name)
+  azure_user_assigned_identity_name  = format("id-%s-terraform", var.repository_name)
   google_project_name                = format("%s Project", upper(var.repository_name))
   google_project_id                  = format("%s-project", lower(var.repository_name))
   google_service_account_id          = format("sa-%s-terraform", lower(var.repository_name))

@@ -36,8 +36,8 @@ variable "location" {
   type        = string
 }
 
-variable "billing_account" {
-  description = "Billing account Display Name for the cloud provider. Not applicable to AWS, instead use the AWS parent organization ID. (see https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html)"
+variable "billing_scope" {
+  description = "Billing Scope Name for the cloud provider. Not applicable to AWS, instead use the AWS parent organization ID. (see https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html)"
   type        = string
   default     = ""
 }

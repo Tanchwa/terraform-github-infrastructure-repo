@@ -22,7 +22,6 @@ resource "aws_iam_role" "terraform" {
 
   tags = var.tags
 
-  provider   = aws.new_account
   depends_on = [aws_organizations_account.terraform]
 }
 

@@ -1,6 +1,6 @@
 data "google_billing_account" "terraform" {
   count        = var.cloud_provider == "google" ? 1 : 0
-  display_name = var.billing_account
+  display_name = var.billing_scope
 }
 
 resource "google_project" "terraform" {

@@ -65,9 +65,65 @@ Type: `string`
 
 Default: `""`
 
+### <a name="input_azure_log_analytics_workspace_id"></a> [azure\_log\_analytics\_workspace\_id](#input\_azure\_log\_analytics\_workspace\_id)
+
+Description: Optional existing Log Analytics Workspace ID to additionally stream the state storage account's blob service diagnostic logs to. If left blank, logs are only sent to the storage account itself (self-logging, mirroring the AWS S3 access-logging setup) -- wire up a Log Analytics Workspace later by setting this and re-applying, or use the azure\_terraform\_state\_blob\_service\_diagnostic\_target\_id output to attach one manually.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_azure_private_dns_zone_id_blob"></a> [azure\_private\_dns\_zone\_id\_blob](#input\_azure\_private\_dns\_zone\_id\_blob)
+
+Description: Optional existing privatelink.blob.core.windows.net Private DNS Zone ID to register the state storage account's private endpoint in. If left blank, the private endpoint is created without DNS integration -- wire up name resolution separately (e.g. a centrally managed private DNS zone).
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_azure_private_dns_zone_id_keyvault"></a> [azure\_private\_dns\_zone\_id\_keyvault](#input\_azure\_private\_dns\_zone\_id\_keyvault)
+
+Description: Optional existing privatelink.vaultcore.azure.net Private DNS Zone ID to register the state Key Vault's private endpoint in. If left blank, the private endpoint is created without DNS integration -- wire up name resolution separately (e.g. a centrally managed private DNS zone).
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_azure_private_endpoint_subnet_id"></a> [azure\_private\_endpoint\_subnet\_id](#input\_azure\_private\_endpoint\_subnet\_id)
+
+Description: Subnet ID the private endpoints for the Terraform state storage account and Key Vault are attached to. Required when cloud\_provider = "azure", since both have public network access disabled.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_billing_account_name"></a> [billing\_account\_name](#input\_billing\_account\_name)
+
+Description: Azure Billing Account name, e.g. "<guid>:<guid>\_2019-05-31" for MCA, or an enrollment/partner billing account name for other types (see the `id` of `az billing account list`). Only applicable to Azure.
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_billing_account_type"></a> [billing\_account\_type](#input\_billing\_account\_type)
+
+Description: Which Azure billing scope shape to use when creating the subscription: "mca" (Microsoft Customer Agreement), "enrollment" (Enterprise Agreement enrollment account), or "mpa" (Microsoft Partner Agreement). Only applicable to Azure.
+
+Type: `string`
+
+Default: `"mca"`
+
+### <a name="input_billing_profile_name"></a> [billing\_profile\_name](#input\_billing\_profile\_name)
+
+Description: Azure Billing Profile name under the billing account (see `az billing profile list`). Only applicable when cloud\_provider = "azure" and billing\_account\_type = "mca".
+
+Type: `string`
+
+Default: `""`
+
 ### <a name="input_billing_scope"></a> [billing\_scope](#input\_billing\_scope)
 
-Description: Billing Scope Name for the cloud provider. Not applicable to AWS, instead use the AWS parent organization ID. (see https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html)
+Description: Billing Scope Name for the cloud provider. Not applicable to AWS, instead use the AWS parent organization ID. (see https://docs.aws.amazon.com/awsaccountbilling/latest/aboutv2/consolidated-billing.html) For Azure, this is the MCA invoice section name or EA enrollment account name, depending on billing\_account\_type; not applicable when billing\_account\_type = "mpa". For GCP, this is the billing account display name.
 
 Type: `string`
 
@@ -80,6 +136,28 @@ Description: The cloud provider to use for the infrastructure.
 Type: `string`
 
 Default: `"aws"`
+
+### <a name="input_customer_name"></a> [customer\_name](#input\_customer\_name)
+
+Description: Azure MPA Customer name/ID under the Partner billing account (see `az billing customer list`). Only applicable when cloud\_provider = "azure" and billing\_account\_type = "mpa".
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_environments"></a> [environments](#input\_environments)
+
+Description: In Preview. A list of environemnts to add to the repo and cloud environment. A new Environment per list item will be created in the repository, as well as a cloud workspace for each.
+
+Type: `list(string)`
+
+Default:
+
+```json
+[
+  "dev"
+]
+```
 
 ### <a name="input_parent_organization_id"></a> [parent\_organization\_id](#input\_parent\_organization\_id)
 
@@ -113,7 +191,19 @@ Default:
 
 ## Outputs
 
-No outputs.
+The following outputs are exported:
+
+### <a name="output_aws_terraform_state_sns_topic_arn"></a> [aws\_terraform\_state\_sns\_topic\_arn](#output\_aws\_terraform\_state\_sns\_topic\_arn)
+
+Description: ARN of the SNS topic that receives S3 event notifications for the Terraform state bucket. Null unless cloud\_provider = "aws".
+
+### <a name="output_azure_terraform_state_blob_service_diagnostic_target_id"></a> [azure\_terraform\_state\_blob\_service\_diagnostic\_target\_id](#output\_azure\_terraform\_state\_blob\_service\_diagnostic\_target\_id)
+
+Description: Sub-resource ID for the state storage account's blob service -- the target\_resource\_id needed to attach another diagnostic setting (e.g. a Log Analytics Workspace) to it later. Null unless cloud\_provider = "azure".
+
+### <a name="output_azure_terraform_state_storage_account_id"></a> [azure\_terraform\_state\_storage\_account\_id](#output\_azure\_terraform\_state\_storage\_account\_id)
+
+Description: Resource ID of the Terraform state storage account. Null unless cloud\_provider = "azure".
 
 ## Contributing
 ### Pre-Commit Hooks

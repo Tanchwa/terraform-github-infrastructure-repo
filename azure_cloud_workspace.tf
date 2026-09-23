@@ -1,25 +1,35 @@
 data "azurerm_billing_mca_account_scope" "terraform" {
-  count                = var.cloud_provider == "azure" ? 1 : 0
-  billing_account_name = "de00d5cd-7f5b-515c-0a04-78af3ffdaf86:1ba8d8a0-a375-4591-98cc-07d3f18c0de0_2019-05-31"
-  billing_profile_name = "Q7VE-6V35-BG7-PGB"
+  count                = var.cloud_provider == "azure" && var.billing_account_type == "mca" ? 1 : 0
+  billing_account_name = var.billing_account_name
+  billing_profile_name = var.billing_profile_name
   invoice_section_name = var.billing_scope
 }
 
 data "azurerm_billing_enrollment_account_scope" "terraform" {
-  count                   = var.cloud_provider == "azure" ? 1 : 0
-  billing_account_name    = "CHANGE ME TO YOUR BILLING ACCOUNT NAME"
+  count                   = var.cloud_provider == "azure" && var.billing_account_type == "enrollment" ? 1 : 0
+  billing_account_name    = var.billing_account_name
   enrollment_account_name = var.billing_scope
+}
+
+data "azurerm_billing_mpa_account_scope" "terraform" {
+  count                = var.cloud_provider == "azure" && var.billing_account_type == "mpa" ? 1 : 0
+  billing_account_name = var.billing_account_name
+  customer_name        = var.customer_name
 }
 
 resource "azurerm_subscription" "terraform" {
   count             = var.cloud_provider == "azure" ? 1 : 0
   alias             = local.azure_subscription_alias
   subscription_name = format("%s Subscription", upper(var.repository_name))
-  billing_scope_id  = coalesce(try(data.azurerm_billing_mca_account_scope.terraform[0].id), try(data.azurerm_billing_enrollment_account_scope.terraform[0].id))
+  billing_scope_id = coalesce(
+    try(data.azurerm_billing_mca_account_scope.terraform[0].id, null),
+    try(data.azurerm_billing_enrollment_account_scope.terraform[0].id, null),
+    try(data.azurerm_billing_mpa_account_scope.terraform[0].id, null),
+  )
 
   timeouts {
-    create = "60m"
-    delete = "60m"
+    create = "20m"
+    delete = "20m"
   }
 }
 

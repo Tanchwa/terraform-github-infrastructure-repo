@@ -2,7 +2,7 @@ resource "aws_iam_role" "terraform" {
   count = var.cloud_provider == "aws" ? 1 : 0
   name  = format("%s-terraform-role", lower(var.repository_name))
   assume_role_policy = jsonencode({
-    Version = "2025-08-18"
+    Version = "2012-10-17"
     Statement = [
       {
         Effect = "Allow"
@@ -38,4 +38,33 @@ resource "github_actions_secret" "aws_iam_role_arn" {
   repository      = github_repository.infrastructure-deployment.name
   secret_name     = "AWS_IAM_ROLE_ARN"
   plaintext_value = aws_iam_role.terraform[0].arn
+}
+
+resource "aws_iam_policy" "assume_target_account_role" {
+  count = var.cloud_provider == "aws" ? 1 : 0
+  name  = "${var.repository_name}-assume-target-account-role-policy"
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = "sts:AssumeRole"
+        Resource = local.aws_target_account_role_arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "assume_target_account_role" {
+  count      = var.cloud_provider == "aws" ? 1 : 0
+  role       = aws_iam_role.terraform[0].name
+  policy_arn = aws_iam_policy.assume_target_account_role[0].arn
+}
+
+resource "github_actions_secret" "aws_target_account_role_arn" {
+  count           = var.cloud_provider == "aws" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "AWS_TARGET_ACCOUNT_ROLE_ARN" # pragma: allowlist secret
+  plaintext_value = local.aws_target_account_role_arn
 }

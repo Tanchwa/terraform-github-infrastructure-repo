@@ -12,7 +12,25 @@ resource "github_repository" "infrastructure-deployment" {
   vulnerability_alerts = true
 }
 
+resource "github_repository_environment" "main" {
+  for_each = toset(var.environments)
+
+  repository  = github_repository.infrastructure-deployment.name
+  environment = each.value
+
+  dynamic "deployment_branch_policy" {
+    for_each = each.value == "prod" ? [1] : []
+    content {
+      custom_branch_policies = false
+      protected_branches     = true
+    }
+  }
+}
+
 resource "github_branch_protection" "main" {
+  count = github_repository.infrastructure-deployment.visibility != "private" ? 1 : 0
+  #|| account is pro
+
   repository_id = github_repository.infrastructure-deployment.node_id
 
   pattern                 = "main"

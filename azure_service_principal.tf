@@ -6,13 +6,12 @@ resource "azurerm_user_assigned_identity" "terraform" {
 }
 
 resource "azurerm_federated_identity_credential" "terraform" {
-  count               = var.cloud_provider == "azure" ? 1 : 0
-  resource_group_name = var.resource_group_name
-  parent_id           = azurerm_user_assigned_identity.terraform[0].id
-  name                = "github-actions"
-  issuer              = "https://token.actions.githubusercontent.com"
-  audience            = ["api://AzureADTokenExchange"]
-  subject             = "repo:${var.repository_owner}/${var.repository_name}"
+  count                     = var.cloud_provider == "azure" ? 1 : 0
+  user_assigned_identity_id = azurerm_user_assigned_identity.terraform[0].id
+  name                      = "github-actions"
+  issuer                    = "https://token.actions.githubusercontent.com"
+  audience                  = ["api://AzureADTokenExchange"]
+  subject                   = "repo:${var.repository_owner}/${var.repository_name}"
 }
 
 data "azurerm_client_config" "current" {}

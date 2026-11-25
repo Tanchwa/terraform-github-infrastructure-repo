@@ -13,6 +13,20 @@ resource "aws_s3_bucket" "terraform_state" {
   tags = var.tags
 }
 
+resource "github_actions_secret" "aws_state_bucket_name" {
+  count           = var.cloud_provider == "aws" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "AWS_STATE_BUCKET" # pragma: allowlist secret
+  plaintext_value = aws_s3_bucket.terraform_state[0].bucket
+}
+
+resource "github_actions_secret" "aws_state_region" {
+  count           = var.cloud_provider == "aws" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "AWS_STATE_REGION" # pragma: allowlist secret
+  plaintext_value = var.location
+}
+
 resource "aws_s3_bucket_public_access_block" "terraform_state" {
   count = var.cloud_provider == "aws" ? 1 : 0
 
@@ -341,7 +355,7 @@ resource "azurerm_storage_account_customer_managed_key" "terraform_state" {
 resource "github_actions_secret" "azure_storage_account_name" {
   count           = var.cloud_provider == "azure" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
-  secret_name     = "AZ_STATE_STORE"
+  secret_name     = "AZ_STATE_STORE" # pragma: allowlist secret
   plaintext_value = azurerm_storage_account.terraform_state[0].name
 }
 
@@ -391,6 +405,13 @@ resource "google_storage_bucket" "terraform_state" {
   versioning {
     enabled = true
   }
+}
+
+resource "github_actions_secret" "gcp_state_bucket_name" {
+  count           = var.cloud_provider == "gcp" ? 1 : 0
+  repository      = github_repository.infrastructure-deployment.name
+  secret_name     = "GCP_STATE_BUCKET" # pragma: allowlist secret
+  plaintext_value = google_storage_bucket.terraform_state[0].name
 }
 
 resource "google_storage_bucket_iam_member" "terraform_state" {

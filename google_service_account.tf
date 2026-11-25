@@ -48,13 +48,13 @@ EOT
 resource "github_actions_secret" "google_service_account_email" {
   count           = var.cloud_provider == "gcp" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
-  secret_name     = "GOOGLE_SERVICE_ACCOUNT_EMAIL"
+  secret_name     = "GCP_SERVICE_ACCOUNT_EMAIL" # pragma: allowlist secret
   plaintext_value = google_service_account.terraform[0].email
 }
 
 resource "github_actions_secret" "google_workload_identity_provider" {
   count           = var.cloud_provider == "gcp" ? 1 : 0
   repository      = github_repository.infrastructure-deployment.name
-  secret_name     = "GOOGLE_WORKLOAD_IDENTITY_PROVIDER"
+  secret_name     = "GCP_WORKLOAD_IDENTITY_PROVIDER" # pragma: allowlist secret
   plaintext_value = google_iam_workload_identity_pool_provider.terraform[0].id
 }

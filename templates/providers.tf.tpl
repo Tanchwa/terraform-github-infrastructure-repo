@@ -30,7 +30,8 @@ terraform {
 # backend config set in pipleine
   }
 %{ endif }
-  
+}
+
 %{ if cloud_provider == "aws" }
 provider "aws" {}
 %{ endif }

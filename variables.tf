@@ -117,6 +117,12 @@ variable "parent_organization_id" {
   default     = ""
 }
 
+variable "aws_close_account_on_deletion" {
+  description = "Whether `terraform destroy` should actually request closure of the AWS Organizations member account (subject to AWS's own restrictions, e.g. accounts can't be closed within ~7 days of creation). When false, destroy only removes the account from Terraform state and it must be closed manually. Only applicable to AWS."
+  type        = bool
+  default     = false
+}
+
 variable "azure_private_endpoint_subnet_id" {
   description = "Subnet ID the private endpoints for the Terraform state storage account and Key Vault are attached to. Required when cloud_provider = \"azure\", since both have public network access disabled."
   type        = string
@@ -143,6 +149,19 @@ variable "azure_private_dns_zone_id_keyvault" {
 variable "azure_log_analytics_workspace_id" {
   description = "Optional existing Log Analytics Workspace ID to additionally stream the state storage account's blob service diagnostic logs to. If left blank, logs are only sent to the storage account itself (self-logging, mirroring the AWS S3 access-logging setup) -- wire up a Log Analytics Workspace later by setting this and re-applying, or use the azure_terraform_state_blob_service_diagnostic_target_id output to attach one manually."
   type        = string
+  default     = ""
+}
+
+variable "template_sync_github_app_id" {
+  description = "App ID of the GitHub App used by the template_sync workflow (see infrastructure-deployment-template/.github/workflows/template_sync.yaml) to authenticate across the template repo and this child repo. Leave blank to skip wiring up the secret (the workflow will fail until it's set)."
+  type        = string
+  default     = ""
+}
+
+variable "template_sync_github_app_private_key" {
+  description = "PEM private key of the GitHub App used by the template_sync workflow. Leave blank to skip wiring up the secret (the workflow will fail until it's set)."
+  type        = string
+  sensitive   = true
   default     = ""
 }
 

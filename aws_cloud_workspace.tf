@@ -3,11 +3,12 @@ locals {
 }
 
 resource "aws_organizations_account" "terraform" {
-  count     = var.cloud_provider == "aws" ? 1 : 0
-  name      = format("%s Account", upper(var.repository_name))
-  email     = var.aws_account_email
-  parent_id = try(var.parent_organization_id, null)
-  role_name = format("%sTerraformRole", local.org_role_name_cleaned)
+  count             = var.cloud_provider == "aws" ? 1 : 0
+  name              = format("%s Account", upper(var.repository_name))
+  email             = var.aws_account_email
+  parent_id         = try(var.parent_organization_id, null)
+  role_name         = format("%sTerraformRole", local.org_role_name_cleaned)
+  close_on_deletion = var.aws_close_account_on_deletion
 
   tags = var.tags
 }

@@ -57,6 +57,14 @@ Type: `string`
 
 Default: `""`
 
+### <a name="input_aws_close_account_on_deletion"></a> [aws\_close\_account\_on\_deletion](#input\_aws\_close\_account\_on\_deletion)
+
+Description: Whether `terraform destroy` should actually request closure of the AWS Organizations member account (subject to AWS's own restrictions, e.g. accounts can't be closed within ~7 days of creation). When false, destroy only removes the account from Terraform state and it must be closed manually. Only applicable to AWS.
+
+Type: `bool`
+
+Default: `false`
+
 ### <a name="input_aws_vpc_cidr_block"></a> [aws\_vpc\_cidr\_block](#input\_aws\_vpc\_cidr\_block)
 
 Description: The CIDR block for the AWS VPC.
@@ -189,9 +197,29 @@ Default:
 }
 ```
 
+### <a name="input_template_sync_github_app_id"></a> [template\_sync\_github\_app\_id](#input\_template\_sync\_github\_app\_id)
+
+Description: App ID of the GitHub App used by the template\_sync workflow (see infrastructure-deployment-template/.github/workflows/template\_sync.yaml) to authenticate across the template repo and this child repo. Leave blank to skip wiring up the secret (the workflow will fail until it's set).
+
+Type: `string`
+
+Default: `""`
+
+### <a name="input_template_sync_github_app_private_key"></a> [template\_sync\_github\_app\_private\_key](#input\_template\_sync\_github\_app\_private\_key)
+
+Description: PEM private key of the GitHub App used by the template\_sync workflow. Leave blank to skip wiring up the secret (the workflow will fail until it's set).
+
+Type: `string`
+
+Default: `""`
+
 ## Outputs
 
 The following outputs are exported:
+
+### <a name="output_aws_account_id"></a> [aws\_account\_id](#output\_aws\_account\_id)
+
+Description: The account ID of the cloud provider account created by this module. Null unless cloud\_provider = "aws".
 
 ### <a name="output_aws_terraform_state_sns_topic_arn"></a> [aws\_terraform\_state\_sns\_topic\_arn](#output\_aws\_terraform\_state\_sns\_topic\_arn)
 
